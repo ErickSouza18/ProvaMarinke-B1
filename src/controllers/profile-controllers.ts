@@ -12,14 +12,12 @@ export class ProfileController {
         try {
             const { firstName, lastName, profession, balance, type } = req.body; // Mantenha as chaves corretas
             const newProfile = await this.profileService.createProfile(firstName, lastName, profession, balance, type);
-    
+
             return res.status(201).json(newProfile);
         } catch (error) {
             return res.status(500).json({ message: "Falha ao criar perfil", error: (error as Error).message });
         }
     }
-    
-    
 
     public async getAllProfiles(req: Request, res: Response): Promise<Response> {
         try {
@@ -54,9 +52,9 @@ export class ProfileController {
         try {
             const { id } = req.params;
             const { firstName, lastName, profession, balance, type } = req.body;
-            
+
             const updatedProfile = await this.profileService.updateProfile(Number(id), { firstName, lastName, profession, balance, type });
-    
+
             if (!updatedProfile) {
                 return res.status(404).json({ message: "Perfil não encontrado" });
             }
@@ -78,9 +76,9 @@ export class ProfileController {
     }
 
     public async getBalance(req: Request, res: Response): Promise<Response> {
-        const { profileId } = req.params; 
+        const { profileId } = req.params;
         try {
-            const balance = await this.profileService.getBalance(Number(profileId)); 
+            const balance = await this.profileService.getBalance(Number(profileId));
             return res.status(200).json({ balance });
         } catch (error) {
             return res.status(500).json({ message: "Erro ao verificar saldo", error });
@@ -88,15 +86,12 @@ export class ProfileController {
     }
 
     public async getUnpaidJobsDetails(req: Request, res: Response): Promise<Response> {
-        const { profileId } = req.params; 
+        const { profileId } = req.params;
         try {
-            const unpaidJobsDetails = await this.profileService.getUnpaidJobsDetails(Number(profileId)); 
+            const unpaidJobsDetails = await this.profileService.getUnpaidJobsDetails(Number(profileId));
             return res.status(200).json(unpaidJobsDetails);
         } catch (error) {
             return res.status(500).json({ message: "Erro ao buscar detalhes dos jobs não pagos", error });
         }
     }
-    
-    
-    
 }

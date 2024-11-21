@@ -68,8 +68,4 @@ app.use("/payment", paymentRoutes);
     }
 })();
 
-
-
-
-
 export default app;

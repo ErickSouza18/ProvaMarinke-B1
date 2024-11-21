@@ -4,7 +4,6 @@ import { ContratanteService } from "../services/contratante-service.js";
 export class ContratanteController {
     private contratanteService: ContratanteService;
 
-
     constructor() {
         this.contratanteService = new ContratanteService();
     }
@@ -13,13 +12,12 @@ export class ContratanteController {
         try {
             const { nomeCompleto, email, telefone } = req.body;
             const newContratante = await this.contratanteService.createContratante(nomeCompleto, email, telefone);
-    
+
             return res.status(201).json(newContratante);
         } catch (error) {
             return res.status(500).json({ message: "Falha ao criar contratante", error: (error as Error).message });
         }
     }
-    
 
     public async getAllContratante(req: Request, res: Response): Promise<Response> {
         try {
@@ -40,7 +38,6 @@ export class ContratanteController {
         }
     }
 
-
     public async deleteContratante(req: Request, res: Response): Promise<Response> {
         const { id } = req.params;
         try {
@@ -51,41 +48,38 @@ export class ContratanteController {
         }
     }
 
-
     public async updateContratante(req: Request, res: Response): Promise<Response> {
         try {
-            const { id } = req.params; 
-            const { nomeCompleto, email, telefone } = req.body; 
-            
+            const { id } = req.params;
+            const { nomeCompleto, email, telefone } = req.body;
+
             const updatedContratante = await this.contratanteService.update(
                 Number(id),
                 { nomeCompleto, email, telefone }
             );
-    
+
             if (!updatedContratante) {
                 return res.status(404).json({ message: "Contratante não encontrado" });
             }
-    
+
             const result = updatedContratante.get({ plain: true });
             delete result.createdAt;
             delete result.updatedAt;
-    
-            return res.status(200).json({ 
+
+            return res.status(200).json({
                 message: `Contratante com ID ${id} foi atualizado com sucesso`,
-                contratante: result 
+                contratante: result
             });
         } catch (error) {
             if (error instanceof Error) {
                 console.error('Erro ao atualizar contratante:', error.message);
-                return res.status(500).json({ message: `Falha ao atualizar contratante, Mas mesmo assim ele foi atualizado`});
+                return res.status(500).json({ message: `Falha ao atualizar contratante, Mas mesmo assim ele foi atualizado` });
             } else {
                 console.error('Erro desconhecido ao atualizar contratante:', error);
                 return res.status(500).json({ message: `Falha ao atualizar contratante`, error: 'Erro desconhecido' });
             }
         }
     }
-
-
 
     public async getContratanteById(req: Request, res: Response): Promise<Response> {
         try {
@@ -104,6 +98,4 @@ export class ContratanteController {
             return res.status(500).json({ message: `Erro ao buscar contratante por ID`, error });
         }
     }
-
-
 }

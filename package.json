@@ -19,10 +19,12 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
+    "csv-parser": "^3.0.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "mysql2": "^3.11.4",
     "provamarinke": "file:",
+    "redis": "^4.7.0",
     "sequelize": "^6.37.5",
     "ts-node": "^10.9.2"
   }

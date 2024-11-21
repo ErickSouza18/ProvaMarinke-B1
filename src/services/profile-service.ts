@@ -3,6 +3,9 @@ import { Deposit } from "../models/deposit-models.js";
 import { Payment } from "../models/Payment-models.js";
 import { Job } from "../models/job-models.js";
 import { ProfileRepository } from "../repositories/profile-repository.js";
+import { json } from "sequelize";
+import redisClient from '../redisClient.js';
+
 
 export class ProfileService {
     private profileRepository: ProfileRepository;
@@ -21,7 +24,22 @@ export class ProfileService {
     }
 
     public async getAllProfiles(): Promise<Profile[]> {
-        return await this.profileRepository.findAll(); // Usa o repositório
+        const cachekey = 'Profiless';
+
+        const cacheProfile = await redisClient.get(cachekey);
+        if (cacheProfile) {
+            console.log('Retornando Cache');
+            return JSON.parse(cacheProfile)
+        }
+
+        const profi = await this.profileRepository.findAll(); // Usa o repositório
+
+        if (profi) {
+            await redisClient.set(cachekey, JSON.stringify(profi), { EX: 120 });
+
+        }
+
+        return profi;
     }
 
     public async findById(id: number): Promise<Profile | null> {
@@ -36,7 +54,6 @@ export class ProfileService {
             throw new Error(`Impossível encontrar perfil pelo ID ${id}: ${(error as Error).message}`);
         }
     }
-    
 
     public async updateProfile(id: number, data: Partial<ProfileCreationAttributes>): Promise<Profile | null> {
         return await this.profileRepository.update(id, data); // Usa o repositório
@@ -46,16 +63,13 @@ export class ProfileService {
         return await this.profileRepository.delete(id); // Usa o repositório
     }
 
-     
-    
-    
     public async getUnpaidJobsDetails(profileId: number): Promise<{ jobId: number, description: string, status: string }[]> {
         try {
             const unpaidJobs = await Job.findAll({
                 attributes: ['id', 'description'],
                 where: {
                     profileId: profileId,
-                    paid: false 
+                    paid: false
                 }
             });
 
@@ -75,7 +89,7 @@ export class ProfileService {
             if (!profile) {
                 throw new Error(`Profile com ID ${clientId} não encontrado`);
             }
-    
+
             // Atualize o saldo (garantindo que os valores sejam tratados como números)
             profile.balance = Number(profile.balance) + amount; // Somar corretamente
             await profile.save(); // Salva as alterações no banco de dados
@@ -90,17 +104,15 @@ export class ProfileService {
             const totalPayments = await Payment.sum('paymentValue', {
                 where: { clientId: profileId },
             }) || 0;
-    
+
             const totalDeposits = await Deposit.sum('depositValue', {
                 where: { clientId: profileId },
             }) || 0;
-    
+
             // Calcule o saldo corretamente, convertendo para o formato em reais
             return (totalDeposits - totalPayments) / 100; // Certifique-se de que isso está correto
         } catch (error) {
             throw new Error(`Erro ao calcular saldo: ${(error as Error).message}`);
         }
     }
-    
-    
 }
